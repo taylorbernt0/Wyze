@@ -51,7 +51,7 @@ def hsv_to_hex(hsv_color):
     rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
     return '%02x%02x%02x' % rgb_color
 
-def party_mode(macs, duration):
+def party_mode(macs, duration=99999):
     print('Starting party mode')
     try:
         bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
@@ -60,10 +60,10 @@ def party_mode(macs, duration):
                                   brightness=100)
             print('Set {} to 100% brightness'.format(bulb.mac))
 
-        threads = list()
-
         start = time.time()
         while True:
+            threads = list()
+
             for bulb in bulbs:
                 hex_color = hsv_to_hex((random.random(), 0.6, 1))
 
@@ -71,19 +71,16 @@ def party_mode(macs, duration):
                 threads.append(t)
                 t.start()
 
-                print(hex_color)
-            print()
-            if time.time() - start >= duration:
-                break
-
             for thread in threads:
                 thread.join()
-            del threads[:]
+
+            if time.time() - start >= duration:
+                break
     except WyzeApiError as e:
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def rainbow_mode(macs, duration):
+def rainbow_mode(macs, speed=1, duration=99999):
     print('Starting rainbow mode')
     try:
         bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
@@ -92,14 +89,12 @@ def rainbow_mode(macs, duration):
                                   brightness=100)
             print('Set {} to 100% brightness'.format(bulb.mac))
 
-        speed = 5
-
-        threads = list()
-
         start = time.time()
 
         i = 0
         while True:
+            threads = list()
+
             for bulb in bulbs:
                 hex_color = hsv_to_hex((i/100.0, 0.6, 1))
 
@@ -109,7 +104,6 @@ def rainbow_mode(macs, duration):
 
             for thread in threads:
                 thread.join()
-            del threads[:]
 
             if time.time() - start >= duration:
                 break
@@ -164,4 +158,4 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
-rainbow_mode(living_room_lights, 600)
+rainbow_mode(taylor_light)
