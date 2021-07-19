@@ -29,11 +29,16 @@ class Bulbs(Resource):
 
     def delete(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('pid', required=True)
+        parser.add_argument('pid', required=False)
         args = parser.parse_args()
 
-        p = currentProcesses[args['pid']]
-        if p is not None:
+        if args['pid'] is None: # If no pid received, terminate all processes
+            for _, p in currentProcesses.items():
+                p.terminate()
+                p.join()
+                del currentProcesses[args['pid']]
+        elif args['pid'] in currentProcesses:
+            p = currentProcesses[args['pid']]
             p.terminate()
             p.join()
             del currentProcesses[args['pid']]
