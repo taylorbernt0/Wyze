@@ -76,7 +76,7 @@ def party_mode(macs, duration):
             if time.time() - start >= duration:
                 break
 
-            for index, thread in enumerate(threads):
+            for thread in threads:
                 thread.join()
             del threads[:]
     except WyzeApiError as e:
@@ -107,7 +107,7 @@ def rainbow_mode(macs, duration):
                 threads.append(t)
                 t.start()
 
-            for index, thread in enumerate(threads):
+            for thread in threads:
                 thread.join()
             del threads[:]
 
