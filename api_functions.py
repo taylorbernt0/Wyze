@@ -68,7 +68,7 @@ def party_mode(macs, duration=99999):
             print('Set {} to 100% brightness'.format(bulb.mac))
 
         start = time.time()
-        while True:
+        while time.time() - start < duration:
             threads = list()
 
             for bulb in bulbs:
@@ -80,9 +80,6 @@ def party_mode(macs, duration=99999):
 
             for thread in threads:
                 thread.join()
-
-            if time.time() - start >= duration:
-                break
     except WyzeApiError as e:
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
@@ -98,7 +95,7 @@ def rainbow_mode(macs, speed=1, duration=99999):
         start = time.time()
 
         i = 0
-        while True:
+        while time.time() - start < duration:
             threads = list()
 
             hex_color = hsv_to_hex((i / 100.0, 0.6, 1))
@@ -109,9 +106,6 @@ def rainbow_mode(macs, speed=1, duration=99999):
 
             for thread in threads:
                 thread.join()
-
-            if time.time() - start >= duration:
-                break
 
             i += speed
             i %= 100
@@ -131,7 +125,7 @@ def strobe_mode(macs, duration=99999):
         start = time.time()
 
         on = False
-        while True:
+        while time.time() - start < duration:
             threads = list()
 
             for bulb in bulbs:
@@ -141,9 +135,6 @@ def strobe_mode(macs, duration=99999):
 
             for thread in threads:
                 thread.join()
-
-            if time.time() - start >= duration:
-                break
 
             on = not on
     except WyzeApiError as e:
