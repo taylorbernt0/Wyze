@@ -43,28 +43,24 @@ def pulse_bulb(mac, duration):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def party_mode(bulbs, duration):
+def party_mode(macs, duration):
     print('Starting party mode')
     try:
-        bulbs = [client.bulbs.info(device_mac=mac) for mac in living_room_lights]
+        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
         for bulb in bulbs:
             client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
                                   brightness=100)
-        print('Set all lights to 100% brightness')
+            print('Set {} to 100% brightness'.format(bulb.mac))
 
         threads = list()
 
         start = time.time()
         while True:
-
-            hsv_color = (random.random(), 0.6, 1)
-            rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
-            rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
-            hex_color = '%02x%02x%02x' % rgb_color
-
             for bulb in bulbs:
-
-                #client.bulbs.set_color(device_mac=bulb.mac, device_model=bulb.product.model, color='%02x%02x%02x' % rgb_color)
+                hsv_color = (random.random(), 0.6, 1)
+                rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
+                rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
+                hex_color = '%02x%02x%02x' % rgb_color
 
                 t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
                 threads.append(t)
@@ -81,10 +77,10 @@ def party_mode(bulbs, duration):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def pulse_mode(bulbs, duration):
+def pulse_mode(macs, duration):
     print('Starting party mode')
     try:
-        bulbs = [client.bulbs.info(device_mac=mac) for mac in living_room_lights]
+        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
         for bulb in bulbs:
             client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
                                   brightness=100)
@@ -141,5 +137,7 @@ kitchen_lights = ['7C78B216E2EF', '7C78B2151E03', '7C78B216AED2']
 dining_lights = ['7C78B216E115', '7C78B2187720', '7C78B218F187', '7C78B215953A', '7C78B2173185']
 taylor_light = ['7C78B21529B8']
 taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
-#pulse_mode(living_room_lights, 600)
-list_devices()
+
+all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
+
+party_mode(all_lights, 600)
