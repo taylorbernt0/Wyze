@@ -8,7 +8,10 @@ import math
 import random
 import colorsys
 
-client = Client(email='taylorbernt@gmail.com', password='Q$FqekFk2h7zF9i')
+email, password = 'taylorbernt@gmail.com', 'Q$FqekFk2h7zF9i'
+client = Client(email=email, password=password)
+
+print('Signed into api as {}'.format(email))
 
 def list_devices():
     try:
@@ -77,8 +80,47 @@ def party_mode(macs, duration):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
+def rainbow_mode(macs, duration):
+    print('Starting rainbow mode')
+    try:
+        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
+        for bulb in bulbs:
+            client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
+                                  brightness=100)
+            print('Set {} to 100% brightness'.format(bulb.mac))
+
+        speed = 5
+
+        threads = list()
+
+        start = time.time()
+
+        i = 0
+        while True:
+            for bulb in bulbs:
+                hsv_color = (i/100.0, 0.6, 1)
+                rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
+                rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
+                hex_color = '%02x%02x%02x' % rgb_color
+
+                t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
+                threads.append(t)
+                t.start()
+
+            if time.time() - start >= duration:
+                break
+
+            for index, thread in enumerate(threads):
+                thread.join()
+
+            i += speed
+            i %= 100
+    except WyzeApiError as e:
+        # You will get a WyzeApiError is the request failed
+        print(f"Got an error: {e}")
+
 def pulse_mode(macs, duration):
-    print('Starting party mode')
+    print('Starting pulse mode')
     try:
         bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
         for bulb in bulbs:
@@ -87,8 +129,6 @@ def pulse_mode(macs, duration):
         print('Set all lights to 100% brightness')
 
         speed = 20
-
-        threads = list()
 
         start = time.time()
         while True:
@@ -99,31 +139,14 @@ def pulse_mode(macs, duration):
             hex_color = '%02x%02x%02x' % rgb_color
 
             for bulb in bulbs:
-                t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
-                threads.append(t)
-                t.start()
+                client.bulbs.set_color(device_mac=bulb.mac, device_model=bulb.product.model, color=hex_color)
 
-            for index, thread in enumerate(threads):
-                thread.join()
-
-            for i in range(100 // speed):
+            for i in range(100 // speed + 1):
                 for bulb in bulbs:
-                    t = threading.Thread(target=client.bulbs.set_brightness,
-                                         kwargs={'device_mac': bulb.mac, 'device_model': bulb.product.model,
-                                                 'brightness': i * speed})
-                    threads.append(t)
-                    t.start()
-                for index, thread in enumerate(threads):
-                    thread.join()
-            for i in range(100 // speed):
+                    client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model, brightness=i)
+            for i in range(100 // speed + 1):
                 for bulb in bulbs:
-                    t = threading.Thread(target=client.bulbs.set_brightness,
-                                         kwargs={'device_mac': bulb.mac, 'device_model': bulb.product.model,
-                                                 'brightness': i * speed})
-                    threads.append(t)
-                    t.start()
-                for index, thread in enumerate(threads):
-                    thread.join()
+                    client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model, brightness=100-i)
 
             if time.time() - start >= duration:
                 break
@@ -140,4 +163,4 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
-party_mode(all_lights, 600)
+rainbow_mode(living_room_lights, 600)
