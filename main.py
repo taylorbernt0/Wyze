@@ -46,6 +46,11 @@ def pulse_bulb(mac, duration):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
+def hsv_to_hex(hsv_color):
+    rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
+    rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
+    return '%02x%02x%02x' % rgb_color
+
 def party_mode(macs, duration):
     print('Starting party mode')
     try:
@@ -60,10 +65,7 @@ def party_mode(macs, duration):
         start = time.time()
         while True:
             for bulb in bulbs:
-                hsv_color = (random.random(), 0.6, 1)
-                rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
-                rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
-                hex_color = '%02x%02x%02x' % rgb_color
+                hex_color = hsv_to_hex((random.random(), 0.6, 1))
 
                 t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
                 threads.append(t)
@@ -76,6 +78,7 @@ def party_mode(macs, duration):
 
             for index, thread in enumerate(threads):
                 thread.join()
+            del threads[:]
     except WyzeApiError as e:
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
@@ -98,20 +101,18 @@ def rainbow_mode(macs, duration):
         i = 0
         while True:
             for bulb in bulbs:
-                hsv_color = (i/100.0, 0.6, 1)
-                rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
-                rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
-                hex_color = '%02x%02x%02x' % rgb_color
+                hex_color = hsv_to_hex((i/100.0, 0.6, 1))
 
                 t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
                 threads.append(t)
                 t.start()
 
-            if time.time() - start >= duration:
-                break
-
             for index, thread in enumerate(threads):
                 thread.join()
+            del threads[:]
+
+            if time.time() - start >= duration:
+                break
 
             i += speed
             i %= 100
