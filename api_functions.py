@@ -195,4 +195,4 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
-rainbow_mode(living_room_lights)
+# rainbow_mode(living_room_lights)
