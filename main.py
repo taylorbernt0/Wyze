@@ -1,4 +1,5 @@
 import os
+import threading
 from datetime import timedelta
 from wyze_sdk import Client
 from wyze_sdk.errors import WyzeApiError
@@ -50,23 +51,95 @@ def party_mode(bulbs, duration):
             client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
                                   brightness=100)
         print('Set all lights to 100% brightness')
+
+        threads = list()
+
         start = time.time()
         while True:
+
+            hsv_color = (random.random(), 0.6, 1)
+            rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
+            rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
+            hex_color = '%02x%02x%02x' % rgb_color
+
             for bulb in bulbs:
 
-                hsv_color = (random.random(), 0.6, 1)
-                rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
-                rgb_color = (int(255*rgb_color[0]), int(255*rgb_color[1]), int(255*rgb_color[2]))
+                #client.bulbs.set_color(device_mac=bulb.mac, device_model=bulb.product.model, color='%02x%02x%02x' % rgb_color)
 
-                client.bulbs.set_color(device_mac=bulb.mac, device_model=bulb.product.model, color='%02x%02x%02x' % rgb_color)
-                print('#%02x%02x%02x' % rgb_color)
+                t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
+                threads.append(t)
+                t.start()
+
+                print(hex_color)
             print()
+            if time.time() - start >= duration:
+                break
+
+            for index, thread in enumerate(threads):
+                thread.join()
+    except WyzeApiError as e:
+        # You will get a WyzeApiError is the request failed
+        print(f"Got an error: {e}")
+
+def pulse_mode(bulbs, duration):
+    print('Starting party mode')
+    try:
+        bulbs = [client.bulbs.info(device_mac=mac) for mac in living_room_lights]
+        for bulb in bulbs:
+            client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
+                                  brightness=100)
+        print('Set all lights to 100% brightness')
+
+        speed = 20
+
+        threads = list()
+
+        start = time.time()
+        while True:
+
+            hsv_color = (random.random(), 0.6, 1)
+            rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
+            rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
+            hex_color = '%02x%02x%02x' % rgb_color
+
+            for bulb in bulbs:
+                t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
+                threads.append(t)
+                t.start()
+
+            for index, thread in enumerate(threads):
+                thread.join()
+
+            for i in range(100 // speed):
+                for bulb in bulbs:
+                    t = threading.Thread(target=client.bulbs.set_brightness,
+                                         kwargs={'device_mac': bulb.mac, 'device_model': bulb.product.model,
+                                                 'brightness': i * speed})
+                    threads.append(t)
+                    t.start()
+                for index, thread in enumerate(threads):
+                    thread.join()
+            for i in range(100 // speed):
+                for bulb in bulbs:
+                    t = threading.Thread(target=client.bulbs.set_brightness,
+                                         kwargs={'device_mac': bulb.mac, 'device_model': bulb.product.model,
+                                                 'brightness': i * speed})
+                    threads.append(t)
+                    t.start()
+                for index, thread in enumerate(threads):
+                    thread.join()
+
             if time.time() - start >= duration:
                 break
     except WyzeApiError as e:
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-
 living_room_lights = ['7C78B214359E', '7C78B2172ED6', '7C78B217887C', '7C78B2189C55', '7C78B2171F1F']
-party_mode(living_room_lights, 60)
+office_light = ['7C78B216AE54']
+kitchen_lights = ['7C78B216E2EF', '7C78B2151E03', '7C78B216AED2']
+dining_lights = ['7C78B216E115', '7C78B2187720', '7C78B218F187', '7C78B215953A', '7C78B2173185']
+taylor_light = ['7C78B21529B8']
+taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
+#pulse_mode(living_room_lights, 600)
+list_devices()
