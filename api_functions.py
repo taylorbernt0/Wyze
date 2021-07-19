@@ -51,13 +51,20 @@ def hsv_to_hex(hsv_color):
     rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
     return '%02x%02x%02x' % rgb_color
 
+def set_brightness(bulb, brightness):
+    client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
+                                brightness=brightness)
+
+def set_color(bulb, color):
+    client.bulbs.set_color(device_mac=bulb.mac, device_model=bulb.product.model,
+                           color=color)
+
 def party_mode(macs, duration=99999):
     print('Starting party mode')
     try:
         bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
         for bulb in bulbs:
-            client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
-                                  brightness=100)
+            set_brightness(bulb, 100)
             print('Set {} to 100% brightness'.format(bulb.mac))
 
         start = time.time()
@@ -67,7 +74,7 @@ def party_mode(macs, duration=99999):
             for bulb in bulbs:
                 hex_color = hsv_to_hex((random.random(), 0.6, 1))
 
-                t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
+                t = threading.Thread(target=set_color, args=(bulb, hex_color))
                 threads.append(t)
                 t.start()
 
@@ -85,8 +92,7 @@ def rainbow_mode(macs, speed=1, duration=99999):
     try:
         bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
         for bulb in bulbs:
-            client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
-                                  brightness=100)
+            set_brightness(bulb, 100)
             print('Set {} to 100% brightness'.format(bulb.mac))
 
         start = time.time()
@@ -98,7 +104,7 @@ def rainbow_mode(macs, speed=1, duration=99999):
             for bulb in bulbs:
                 hex_color = hsv_to_hex((i/100.0, 0.6, 1))
 
-                t = threading.Thread(target=client.bulbs.set_color, kwargs={'device_mac':bulb.mac, 'device_model':bulb.product.model, 'color':hex_color})
+                t = threading.Thread(target=set_color, args=(bulb, hex_color))
                 threads.append(t)
                 t.start()
 
@@ -110,6 +116,37 @@ def rainbow_mode(macs, speed=1, duration=99999):
 
             i += speed
             i %= 100
+    except WyzeApiError as e:
+        # You will get a WyzeApiError is the request failed
+        print(f"Got an error: {e}")
+
+def strobe_mode(macs, duration=99999):
+    print('Starting strobe mode')
+    try:
+        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
+        for bulb in bulbs:
+            set_brightness(bulb, 100)
+            set_color(bulb, 'FFFFFF')
+            print('Set {} to 100% brightness'.format(bulb.mac))
+
+        start = time.time()
+
+        on = False
+        while True:
+            threads = list()
+
+            for bulb in bulbs:
+                t = threading.Thread(target=set_brightness, args=(bulb, 100 if on else 0))
+                threads.append(t)
+                t.start()
+
+            for thread in threads:
+                thread.join()
+
+            if time.time() - start >= duration:
+                break
+
+            on = not on
     except WyzeApiError as e:
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
@@ -158,4 +195,4 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
-rainbow_mode(taylor_light)
+rainbow_mode(living_room_lights)
