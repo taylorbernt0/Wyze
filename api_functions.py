@@ -101,9 +101,8 @@ def rainbow_mode(macs, speed=1, duration=99999):
         while True:
             threads = list()
 
+            hex_color = hsv_to_hex((i / 100.0, 0.6, 1))
             for bulb in bulbs:
-                hex_color = hsv_to_hex((i/100.0, 0.6, 1))
-
                 t = threading.Thread(target=set_color, args=(bulb, hex_color))
                 threads.append(t)
                 t.start()
@@ -195,4 +194,5 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
-rainbow_mode(living_room_lights)
+if __name__ == "__main__":
+    rainbow_mode(living_room_lights)
