@@ -95,7 +95,7 @@ def party_mode(macs, duration=99999):
             for bulb in bulbs:
                 hex_color = hsv_to_hex((random.random(), 0.6, 1))
 
-                t = threading.Thread(target=set_color, args=(bulb, hex_color))
+                t = threading.Thread(target=set_color, args=(bulb, hex_color), daemon=True)
                 threads.append(t)
                 t.start()
 
@@ -119,7 +119,7 @@ def rainbow_mode(macs, speed=1, duration=99999):
 
             hex_color = hsv_to_hex((i / 100.0, 0.6, 1))
             for bulb in bulbs:
-                t = threading.Thread(target=set_color, args=(bulb, hex_color))
+                t = threading.Thread(target=set_color, args=(bulb, hex_color), daemon=True)
                 threads.append(t)
                 t.start()
 
@@ -146,7 +146,7 @@ def strobe_mode(macs, duration=99999):
             threads = list()
 
             for bulb in bulbs:
-                t = threading.Thread(target=set_brightness, args=(bulb, 100 if on else 0))
+                t = threading.Thread(target=set_brightness, args=(bulb, 100 if on else 0), daemon=True)
                 threads.append(t)
                 t.start()
 
