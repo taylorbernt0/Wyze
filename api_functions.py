@@ -172,6 +172,15 @@ def strobe_mode(macs, brightness=100, duration=99999):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
+def color_mode(macs, color, brightness=100):
+    try:
+        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
+        set_brightness(bulbs, brightness)
+        set_color(bulbs, color)
+    except WyzeApiError as e:
+        # You will get a WyzeApiError is the request failed
+        print(f"Got an error: {e}")
+
 living_room_lights = ['7C78B214359E', '7C78B2172ED6', '7C78B217887C', '7C78B2189C55', '7C78B2171F1F']
 office_light = ['7C78B216AE54']
 kitchen_lights = ['7C78B216E2EF', '7C78B2151E03', '7C78B216AED2']
@@ -182,4 +191,4 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
 if __name__ == "__main__":
-    strobe_mode(all_lights)
+    rainbow_mode(all_lights)

@@ -11,6 +11,7 @@ api = Api(app)
 currentProcesses = dict()
 
 mode_map = {
+    'color': api_functions.color_mode,
     'rainbow': api_functions.rainbow_mode,
     'party': api_functions.party_mode,
     'strobe': api_functions.strobe_mode
@@ -22,21 +23,34 @@ class Bulbs(Resource):
         parser.add_argument('macs', required=True)
         parser.add_argument('mode', required=True)
         parser.add_argument('brightness', required=True)
-        parser.add_argument('speed', required=False)
+        parser.add_argument('color', required=False)
         args = parser.parse_args()
 
+        kwargs_list = {}
+
+        # MACS
         macs = ast.literal_eval(args['macs'])
         macs = [e.strip() for e in macs]
 
+        # MODE
         mode = args['mode']
         if (mode is None) or (mode not in mode_map):
             return {'data': 'Mode Name Not Found'}, 404
 
+        # BRIGHTNESS
         brightness = args['brightness']
-        if (brightness is None) or (not isinstance(brightness, int) or (brightness < 0) or (brightness > 100)):
+        if (brightness is None) or (not brightness.isdigit()) or (int(brightness) < 0) or (int(brightness) > 100):
             return {'data': 'Invalid Brightness'}, 404
+        kwargs_list['brightness'] = int(brightness)
 
-        p = Process(target=mode_map[mode], args=(macs,), kwargs={'brightness': brightness}, daemon=True)
+        # COLOR
+        color = args['color']
+        if color is not None and mode == 'color':
+            kwargs_list['color'] = color
+        elif mode == 'color':
+            return {'data': 'Color Parameter Is Not Set'}, 404
+
+        p = Process(target=mode_map[mode], args=(macs,), kwargs=kwargs_list, daemon=True)
 
         id = str(uuid.uuid4())
         p.name = id
