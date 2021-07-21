@@ -11,7 +11,6 @@ api = Api(app)
 currentProcesses = dict()
 
 mode_map = {
-    'info': api_functions.get_bulbs_info,
     'temp': api_functions.temp_mode,
     'color': api_functions.color_mode,
     'rainbow': api_functions.rainbow_mode,
