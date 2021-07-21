@@ -7,13 +7,11 @@ import time
 import math
 import random
 import colorsys
+import json
+import multiprocessing
 
-email, password = 'taylorbernt@gmail.com', 'Q$FqekFk2h7zF9i'
-client = Client(email=email, password=password)
 
-print('Signed into api as {}'.format(email))
-
-def list_devices():
+def print_devices(client):
     try:
         response = client.devices_list()
         for device in client.devices_list():
@@ -26,90 +24,93 @@ def list_devices():
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def pulse_mode(macs, duration):
-    print('Starting pulse mode')
-    try:
-        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
-        for bulb in bulbs:
-            client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
-                                  brightness=100)
-        print('Set all lights to 100% brightness')
-
-        speed = 20
-
-        start = time.time()
-        while True:
-
-            hsv_color = (random.random(), 0.6, 1)
-            rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
-            rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
-            hex_color = '%02x%02x%02x' % rgb_color
-
-            for bulb in bulbs:
-                client.bulbs.set_color(device_mac=bulb.mac, device_model=bulb.product.model, color=hex_color)
-
-            for i in range(100 // speed + 1):
-                for bulb in bulbs:
-                    client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model, brightness=i)
-            for i in range(100 // speed + 1):
-                for bulb in bulbs:
-                    client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model, brightness=100-i)
-
-            if time.time() - start >= duration:
-                break
-    except WyzeApiError as e:
-        # You will get a WyzeApiError is the request failed
-        print(f"Got an error: {e}")
-
 def hsv_to_hex(hsv_color):
     rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], hsv_color[2])
     rgb_color = (int(255 * rgb_color[0]), int(255 * rgb_color[1]), int(255 * rgb_color[2]))
     return '%02x%02x%02x' % rgb_color
 
-def set_brightness(bulb, brightness):
-    if type(bulb) is list:
-        for b in bulb:
-            set_brightness(b, brightness)
+def set_brightness(client, bulbs, brightness):
+    if type(bulbs) is list:
+        for b in bulbs:
+            set_brightness(client, b, brightness)
     else:
-        client.bulbs.set_brightness(device_mac=bulb.mac, device_model=bulb.product.model,
+        client.bulbs.set_brightness(device_mac=bulbs.mac, device_model=bulbs.product.model,
                                 brightness=brightness)
 
-def set_color(bulb, color):
-    if type(bulb) is list:
-        for b in bulb:
-            set_color(b, color)
+def set_brightness_threaded(client, bulbs, brightness):
+    threads = list()
+    for bulb in bulbs:
+        t = threading.Thread(target=set_brightness, args=(client, bulb, brightness), daemon=True)
+        threads.append(t)
+        t.start()
+
+    for thread in threads:
+        thread.join()
+
+def set_color(client, bulbs, color):
+    if type(bulbs) is list:
+        for b in bulbs:
+            set_color(client, b, color)
     else:
-        client.bulbs.set_color(device_mac=bulb.mac, device_model=bulb.product.model,
+        client.bulbs.set_color(device_mac=bulbs.mac, device_model=bulbs.product.model,
                            color=color)
 
-def set_on(bulb):
-    if type(bulb) is list:
-        for b in bulb:
-            set_on(b)
-    else:
-        client.bulbs.turn_on(device_mac=bulb.mac, device_model=bulb.product.model)
+def set_color_threaded(client, bulbs, color):
+    threads = list()
+    for bulb in bulbs:
+        t = threading.Thread(target=set_color, args=(client, bulb, color), daemon=True)
+        threads.append(t)
+        t.start()
 
-def set_off(bulb):
-    if type(bulb) is list:
-        for b in bulb:
-            set_off(b)
-    else:
-        client.bulbs.turn_off(device_mac=bulb.mac, device_model=bulb.product.model)
+    for thread in threads:
+        thread.join()
 
-def party_mode(macs, brightness=100, duration=99999):
+def set_temp(client, bulbs, temp):
+    if type(bulbs) is list:
+        for b in bulbs:
+            set_temp(client, b, temp)
+    else:
+        client.bulbs.set_color_temp(device_mac=bulbs.mac, device_model=bulbs.product.model,
+                           color_temp=temp)
+
+def set_temp_threaded(client, bulbs, temp):
+    threads = list()
+    for bulb in bulbs:
+        t = threading.Thread(target=set_temp, args=(client, bulb, temp), daemon=True)
+        threads.append(t)
+        t.start()
+
+    for thread in threads:
+        thread.join()
+
+def set_on(client, bulbs):
+    if type(bulbs) is list:
+        for b in bulbs:
+            set_on(client, b)
+    else:
+        client.bulbs.turn_on(device_mac=bulbs.mac, device_model=bulbs.product.model)
+
+def set_off(client, bulbs):
+    if type(bulbs) is list:
+        for b in bulbs:
+            set_off(client, b)
+    else:
+        client.bulbs.turn_off(device_mac=bulbs.mac, device_model=bulbs.product.model)
+
+def party_mode(client, macs, brightness=100, duration=99999):
     print('Starting party mode')
     try:
-        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
-        set_brightness(bulbs, brightness)
+        bulbs = get_bulbs_info(client, macs=macs)
+        set_brightness_threaded(client, bulbs, brightness)
 
         start = time.time()
         while time.time() - start < duration:
             threads = list()
 
             for bulb in bulbs:
-                hex_color = hsv_to_hex((random.random(), 0.6, 1))
+                hex_color = hsv_to_hex((random.random(), 1, 1))
 
-                t = threading.Thread(target=set_color, args=(bulb, hex_color), daemon=True)
+                t = threading.Thread(target=set_color, args=(client, bulb, hex_color), daemon=True)
                 threads.append(t)
                 t.start()
 
@@ -119,11 +120,12 @@ def party_mode(macs, brightness=100, duration=99999):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def rainbow_mode(macs, brightness=100, speed=2, duration=99999):
+def rainbow_mode(client, macs, brightness=100, speed=2, duration=99999):
     print('Starting rainbow mode')
     try:
-        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
-        set_brightness(bulbs, brightness)
+        #bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
+        bulbs = get_bulbs_info(client, macs=macs)
+        set_brightness_threaded(client, bulbs, brightness)
 
         start = time.time()
 
@@ -133,7 +135,7 @@ def rainbow_mode(macs, brightness=100, speed=2, duration=99999):
 
             hex_color = hsv_to_hex((i / 100.0, 1, 1))
             for bulb in bulbs:
-                t = threading.Thread(target=set_color, args=(bulb, hex_color), daemon=True)
+                t = threading.Thread(target=set_color, args=(client, bulb, hex_color), daemon=True)
                 threads.append(t)
                 t.start()
 
@@ -146,12 +148,12 @@ def rainbow_mode(macs, brightness=100, speed=2, duration=99999):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def strobe_mode(macs, brightness=100, duration=99999):
+def strobe_mode(client, macs, brightness=100, duration=99999):
     print('Starting strobe mode')
     try:
-        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
-        set_brightness(bulbs, brightness)
-        set_color(bulbs, 'FFFFFF')
+        bulbs = get_bulbs_info(client, macs=macs)
+        set_brightness_threaded(client, bulbs, brightness)
+        set_color_threaded(client, bulbs, 'FF0000')
 
         start = time.time()
 
@@ -172,14 +174,68 @@ def strobe_mode(macs, brightness=100, duration=99999):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def color_mode(macs, color, brightness=100):
+def color_mode(client, macs, color, brightness=100):
     try:
-        bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
-        set_brightness(bulbs, brightness)
-        set_color(bulbs, color)
+        bulbs = get_bulbs_info(client, macs=macs)
+        set_brightness_threaded(client, bulbs, brightness)
+        set_color_threaded(client, bulbs, color)
     except WyzeApiError as e:
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
+
+def temp_mode(client, macs, temp, brightness=100):
+    try:
+        bulbs = get_bulbs_info(client, macs=macs)
+        set_brightness_threaded(client, bulbs, brightness)
+        set_temp_threaded(client, bulbs, temp)
+    except WyzeApiError as e:
+        # You will get a WyzeApiError is the request failed
+        print(f"Got an error: {e}")
+
+bulb_info_cache = {}
+def _get_bulb_info(client, mac):
+    info = client.bulbs.info(device_mac=mac)
+    bulb_info_cache[mac] = info
+    return info
+
+def get_bulbs_info(client, macs=None, try_use_cache=False):
+    if try_use_cache and len(bulb_info_cache) != 0:
+        return bulb_info_cache
+
+    bulbs = client.bulbs.list()
+    threads = list()
+    for b in bulbs:
+        if (macs is None) or (macs is not None and b.mac in macs):
+            t = threading.Thread(target=_get_bulb_info, args=(client, b.mac,))
+            threads.append(t)
+            t.start()
+
+    for t in threads:
+        t.join()
+
+    return list(bulb_info_cache.values())
+
+bulb_info_json_cache = {}
+def _get_bulb_info_json(client, mac):
+    info = client.bulbs.info(device_mac=mac).get_non_null_attributes()
+    bulb_info_json_cache[mac] = info
+    return info
+
+def get_bulbs_info_json(client, try_use_cache=False):
+    if try_use_cache and len(bulb_info_json_cache) != 0:
+        return bulb_info_json_cache
+
+    bulbs = client.bulbs.list()
+    threads = list()
+    for b in bulbs:
+        t = threading.Thread(target=_get_bulb_info_json, args=(client, b.mac,))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    return bulb_info_json_cache
 
 living_room_lights = ['7C78B214359E', '7C78B2172ED6', '7C78B217887C', '7C78B2189C55', '7C78B2171F1F']
 office_light = ['7C78B216AE54']
@@ -190,5 +246,15 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
+def get_client():
+    email, password = 'taylorbernt@gmail.com', 'Q$FqekFk2h7zF9i'
+    client = Client(email=email, password=password)
+    print('Signed into api as {}'.format(email))
+    return client
+
 if __name__ == "__main__":
-    rainbow_mode(all_lights)
+    client = get_client()
+    #rainbow_mode(all_lights, speed=4)
+    #lis = get_bulbs_info(client)
+    #print(lis)
+    rainbow_mode(client, macs=living_room_lights)

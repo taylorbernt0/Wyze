@@ -11,6 +11,8 @@ api = Api(app)
 currentProcesses = dict()
 
 mode_map = {
+    'info': api_functions.get_bulbs_info,
+    'temp': api_functions.temp_mode,
     'color': api_functions.color_mode,
     'rainbow': api_functions.rainbow_mode,
     'party': api_functions.party_mode,
@@ -18,46 +20,62 @@ mode_map = {
 }
 
 class Bulbs(Resource):
+    def __init__(self):
+        self.client = api_functions.get_client()
+
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('macs', required=True)
-        parser.add_argument('mode', required=True)
-        parser.add_argument('brightness', required=True)
+        parser.add_argument('macs', required=False)
+        parser.add_argument('mode', required=False)
+        parser.add_argument('brightness', required=False)
         parser.add_argument('color', required=False)
-        args = parser.parse_args()
 
+        args = parser.parse_args()
         kwargs_list = {}
 
-        # MACS
-        macs = ast.literal_eval(args['macs'])
-        macs = [e.strip() for e in macs]
-
-        # MODE
+        macs = args['macs']
         mode = args['mode']
-        if (mode is None) or (mode not in mode_map):
-            return {'data': 'Mode Name Not Found'}, 404
-
-        # BRIGHTNESS
         brightness = args['brightness']
-        if (brightness is None) or (not brightness.isdigit()) or (int(brightness) < 0) or (int(brightness) > 100):
-            return {'data': 'Invalid Brightness'}, 404
-        kwargs_list['brightness'] = int(brightness)
-
-        # COLOR
         color = args['color']
-        if color is not None and mode == 'color':
-            kwargs_list['color'] = color
-        elif mode == 'color':
-            return {'data': 'Color Parameter Is Not Set'}, 404
 
-        p = Process(target=mode_map[mode], args=(macs,), kwargs=kwargs_list, daemon=True)
+        try:
+            # Validate mode arguments
+            if (mode is None) or (mode not in mode_map):
+                return {'data': 'Mode Name Not Found'}, 404
+            elif mode == 'temp' and (macs is None or color is None):
+                return {'data': 'Arguments required: (macs, color)'}, 404
+            elif mode == 'color' and (macs is None or color is None):
+                return {'data': 'Arguments required: (macs, color)'}, 404
+            elif mode == 'rainbow' and (macs is None):
+                return {'data': 'Arguments required: (macs)'}, 404
+            elif mode == 'party' and (macs is None):
+                return {'data': 'Arguments required: (macs)'}, 404
+            elif mode == 'strobe' and (macs is None):
+                return {'data': 'Arguments required: (macs)'}, 404
 
-        id = str(uuid.uuid4())
-        p.name = id
-        currentProcesses[id] = p
-        p.start()
+            # MACS
+            macs = ast.literal_eval(macs)
+            macs = [e.strip() for e in macs]
+
+            # BRIGHTNESS
+            if brightness is not None and ((not brightness.isdigit()) or (int(brightness) < 0) or (int(brightness) > 100)):
+                return {'data': 'Invalid Brightness'}, 404
+            elif brightness is not None:
+                kwargs_list['brightness'] = int(brightness)
+
+            # COLOR
+            if color is not None:
+                kwargs_list['color'] = color
+
+            # Create mode process
+            id = str(uuid.uuid4())
+            p = Process(target=mode_map[mode], args=(self.client, macs,), kwargs=kwargs_list, daemon=True, name=id)
+            currentProcesses[id] = p
+            p.start()
+        except:
+            return {'data': 'Something Went Wrong :('}, 404
         
-        return {'data': {'success': True, 'pid': id}}, 200
+        return {'data': {'Success': True, 'pid': id}}, 200
 
     def delete(self):
         parser = reqparse.RequestParser()
