@@ -23,6 +23,13 @@ class Bulbs(Resource):
     def __init__(self):
         self.client = api_functions.get_client()
 
+    def get(self):
+        return app.response_class(
+            response=api_functions.get_bulbs_info_json(self.client),
+            status=200,
+            mimetype='application/json'
+        )
+
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('macs', required=False)

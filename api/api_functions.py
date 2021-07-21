@@ -218,12 +218,13 @@ def get_bulbs_info(client, macs=None, try_use_cache=False):
 bulb_info_json_cache = {}
 def _get_bulb_info_json(client, mac):
     info = client.bulbs.info(device_mac=mac).get_non_null_attributes()
+    del info['switch_state']
     bulb_info_json_cache[mac] = info
     return info
 
 def get_bulbs_info_json(client, try_use_cache=False):
     if try_use_cache and len(bulb_info_json_cache) != 0:
-        return bulb_info_json_cache
+        return json.dumps(bulb_info_json_cache)
 
     bulbs = client.bulbs.list()
     threads = list()
@@ -235,7 +236,7 @@ def get_bulbs_info_json(client, try_use_cache=False):
     for t in threads:
         t.join()
 
-    return bulb_info_json_cache
+    return json.dumps(bulb_info_json_cache)
 
 living_room_lights = ['7C78B214359E', '7C78B2172ED6', '7C78B217887C', '7C78B2189C55', '7C78B2171F1F']
 office_light = ['7C78B216AE54']
@@ -255,6 +256,6 @@ def get_client():
 if __name__ == "__main__":
     client = get_client()
     #rainbow_mode(all_lights, speed=4)
-    #lis = get_bulbs_info(client)
-    #print(lis)
-    rainbow_mode(client, macs=living_room_lights)
+    lis = get_bulbs_info_json(client)
+    print(lis)
+    #rainbow_mode(client, macs=living_room_lights)
