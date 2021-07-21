@@ -8,7 +8,6 @@ import math
 import random
 import colorsys
 import json
-import multiprocessing
 
 
 def print_devices(client):
@@ -100,8 +99,10 @@ def set_off(client, bulbs):
 def party_mode(client, macs, brightness=100, duration=99999):
     print('Starting party mode')
     try:
+        s = time.time()
         bulbs = get_bulbs_info(client, macs=macs)
         set_brightness_threaded(client, bulbs, brightness)
+        print("Initialized bulbs ({}s)".format(str(round(time.time() - s, 2))))
 
         start = time.time()
         while time.time() - start < duration:
@@ -121,11 +122,12 @@ def party_mode(client, macs, brightness=100, duration=99999):
         print(f"Got an error: {e}")
 
 def rainbow_mode(client, macs, brightness=100, speed=2, duration=99999):
-    print('Starting rainbow mode')
+    print('Starting rainbow mode...')
     try:
-        #bulbs = [client.bulbs.info(device_mac=mac) for mac in macs]
+        s = time.time()
         bulbs = get_bulbs_info(client, macs=macs)
         set_brightness_threaded(client, bulbs, brightness)
+        print("Initialized bulbs ({}s)".format(str(round(time.time()-s, 2))))
 
         start = time.time()
 
@@ -148,12 +150,14 @@ def rainbow_mode(client, macs, brightness=100, speed=2, duration=99999):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-def strobe_mode(client, macs, brightness=100, duration=99999):
+def strobe_mode(client, macs, color='FFFFFF', brightness=100, duration=99999):
     print('Starting strobe mode')
     try:
+        s = time.time()
         bulbs = get_bulbs_info(client, macs=macs)
         set_brightness_threaded(client, bulbs, brightness)
-        set_color_threaded(client, bulbs, 'FF0000')
+        set_color_threaded(client, bulbs, color)
+        print("Initialized bulbs ({}s)".format(str(round(time.time() - s, 2))))
 
         start = time.time()
 
@@ -162,7 +166,7 @@ def strobe_mode(client, macs, brightness=100, duration=99999):
             threads = list()
 
             for bulb in bulbs:
-                t = threading.Thread(target=set_on if on else set_off, args=(bulb,), daemon=True)
+                t = threading.Thread(target=set_on if on else set_off, args=(client, bulb,), daemon=True)
                 threads.append(t)
                 t.start()
 
@@ -192,15 +196,15 @@ def temp_mode(client, macs, temp, brightness=100):
         # You will get a WyzeApiError is the request failed
         print(f"Got an error: {e}")
 
-bulb_info_cache = {}
+_bulb_info_cache = {}
 def _get_bulb_info(client, mac):
     info = client.bulbs.info(device_mac=mac)
-    bulb_info_cache[mac] = info
+    _bulb_info_cache[mac] = info
     return info
 
 def get_bulbs_info(client, macs=None, try_use_cache=False):
-    if try_use_cache and len(bulb_info_cache) != 0:
-        return bulb_info_cache
+    if try_use_cache and len(_bulb_info_cache) != 0:
+        return _bulb_info_cache
 
     bulbs = client.bulbs.list()
     threads = list()
@@ -213,18 +217,18 @@ def get_bulbs_info(client, macs=None, try_use_cache=False):
     for t in threads:
         t.join()
 
-    return list(bulb_info_cache.values())
+    return list(_bulb_info_cache.values())
 
-bulb_info_json_cache = {}
+_bulb_info_json_cache = {}
 def _get_bulb_info_json(client, mac):
     info = client.bulbs.info(device_mac=mac).get_non_null_attributes()
     del info['switch_state']
-    bulb_info_json_cache[mac] = info
+    _bulb_info_json_cache[mac] = info
     return info
 
 def get_bulbs_info_json(client, try_use_cache=False):
-    if try_use_cache and len(bulb_info_json_cache) != 0:
-        return json.dumps(bulb_info_json_cache)
+    if try_use_cache and len(_bulb_info_json_cache) != 0:
+        return json.dumps(_bulb_info_json_cache)
 
     bulbs = client.bulbs.list()
     threads = list()
@@ -236,7 +240,7 @@ def get_bulbs_info_json(client, try_use_cache=False):
     for t in threads:
         t.join()
 
-    return json.dumps(bulb_info_json_cache)
+    return json.dumps(_bulb_info_json_cache)
 
 living_room_lights = ['7C78B214359E', '7C78B2172ED6', '7C78B217887C', '7C78B2189C55', '7C78B2171F1F']
 office_light = ['7C78B216AE54']
@@ -248,14 +252,17 @@ taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
 all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
 
 def get_client():
+    s = time.time()
     email, password = 'taylorbernt@gmail.com', 'Q$FqekFk2h7zF9i'
     client = Client(email=email, password=password)
-    print('Signed into api as {}'.format(email))
+    print('Signed into api as {0} ({1}s)'.format(email, str(round(time.time()-s, 2))))
     return client
 
 if __name__ == "__main__":
     client = get_client()
-    #rainbow_mode(all_lights, speed=4)
-    lis = get_bulbs_info_json(client)
-    print(lis)
-    #rainbow_mode(client, macs=living_room_lights)
+
+    if True:
+        party_mode(client, macs=living_room_lights)
+    else:
+        lis = get_bulbs_info_json(client)
+        print(lis)
