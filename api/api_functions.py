@@ -8,7 +8,17 @@ import math
 import random
 import colorsys
 import json
+from enum import Enum
 
+
+class Lights(Enum):
+    LIVING_ROOM = ['7C78B214359E', '7C78B2172ED6', '7C78B217887C', '7C78B2189C55', '7C78B2171F1F']
+    OFFICE = ['7C78B216AE54']
+    KITCHEN = ['7C78B216E2EF', '7C78B2151E03', '7C78B216AED2']
+    DINING_ROOM = ['7C78B216E115', '7C78B2187720', '7C78B218F187', '7C78B215953A', '7C78B2173185']
+    TAYLOR_BED = ['7C78B21529B8']
+    TAYLOR_BATH = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
+    ALL = LIVING_ROOM + OFFICE + KITCHEN + DINING_ROOM + TAYLOR_BED + TAYLOR_BATH
 
 def print_devices(client):
     try:
@@ -242,15 +252,6 @@ def get_bulbs_info_json(client, try_use_cache=False):
 
     return json.dumps(_bulb_info_json_cache)
 
-living_room_lights = ['7C78B214359E', '7C78B2172ED6', '7C78B217887C', '7C78B2189C55', '7C78B2171F1F']
-office_light = ['7C78B216AE54']
-kitchen_lights = ['7C78B216E2EF', '7C78B2151E03', '7C78B216AED2']
-dining_lights = ['7C78B216E115', '7C78B2187720', '7C78B218F187', '7C78B215953A', '7C78B2173185']
-taylor_light = ['7C78B21529B8']
-taylor_bathroom_lights = ['7C78B218995E', '7C78B216BEEC', '7C78B2176CDA']
-
-all_lights = living_room_lights + office_light + kitchen_lights + dining_lights + taylor_light + taylor_bathroom_lights
-
 def get_client():
     s = time.time()
     email, password = 'taylorbernt@gmail.com', 'Q$FqekFk2h7zF9i'
@@ -262,7 +263,7 @@ if __name__ == "__main__":
     client = get_client()
 
     if True:
-        party_mode(client, macs=living_room_lights)
+        party_mode(client, macs=Lights.LIVING_ROOM)
     else:
         lis = get_bulbs_info_json(client)
         print(lis)
