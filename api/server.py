@@ -1,11 +1,14 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from flask_cors import CORS, cross_origin
 import api_functions
 import uuid
 import ast
 from multiprocessing import Process
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 api = Api(app)
 
 currentProcesses = dict()
