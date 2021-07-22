@@ -11,7 +11,7 @@ export default {
         },
     },
     actions: {
-        async bulbPost(_, {mode, macs}) {
+        async bulbPost(_, { mode, macs }) {
             let payload = {
                 mode: mode,
                 macs: JSON.stringify(macs),
@@ -21,7 +21,9 @@ export default {
         },
 
         async getBulbs({ commit }) {
-            const response = await axios.get("/bulbs");
+            const response = await axios.get("/bulbs", {
+                params: { data: "bulbs" },
+            });
 
             let bulbs = Object.keys(response.data).map(
                 (key) => response.data[key]
@@ -30,6 +32,11 @@ export default {
                 "setBulbs",
                 bulbs.sort((a, b) => a.nickname.localeCompare(b.nickname))
             );
+        },
+
+        async deleteProcess() {
+            const response = await axios.delete("/bulbs");
+            return response.data;
         },
     },
 

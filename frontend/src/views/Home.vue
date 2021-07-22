@@ -13,6 +13,10 @@
             @click="bulbPost({ mode: 'party', macs: selectedBulbs })"
         />
         <Button label="Check All" @click="checkAll()" />
+        <Button
+            label="Delete Processes"
+            @click="deleteProcess"
+        />
         <div v-for="bulb in bulbsList" :key="bulb.mac">
             <Bulb
                 :name="bulb.nickname"
@@ -45,7 +49,7 @@ export default {
         this.getBulbs();
     },
     methods: {
-        ...mapActions("bulbs", ["getBulbs", "bulbPost"]),
+        ...mapActions("bulbs", ["getBulbs", "bulbPost", "deleteProcess"]),
         checked(mac) {
             if (this.selectedBulbs.includes(mac)) {
                 this.selectedBulbs = this.selectedBulbs.filter(
