@@ -47,6 +47,8 @@
                 :name="bulb.nickname"
                 :mac="bulb.mac"
                 :isChecked="selectedBulbs.includes(bulb.mac)"
+                :isOnline="bulb.is_online"
+                :color="'#' + bulb.color"
                 @checked="checked(bulb.mac)"
             />
         </div>

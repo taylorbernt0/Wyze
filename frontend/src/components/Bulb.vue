@@ -1,11 +1,14 @@
 <template>
-    <div class="bulb">
+    <div class="bulb" :style="'background-color: ' + color">
         <input :checked="isChecked" type="checkbox" @click="checked" />
         <div>
             {{ name }}
         </div>
         <div>
             {{ mac }}
+        </div>
+        <div>
+            online: {{ isOnline }}
         </div>
     </div>
 </template>
@@ -17,6 +20,8 @@ export default {
         name: String,
         mac: String,
         isChecked: Boolean,
+        isOnline: Boolean,
+        color: String
     },
     methods: {
         checked() {

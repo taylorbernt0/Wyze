@@ -137,7 +137,10 @@ def get_bulbs_info(client, macs=None, try_use_cache=False):
 
 _bulb_info_json_cache = {}
 def _get_bulb_info_json(client, mac):
-    info = client.bulbs.info(device_mac=mac).get_non_null_attributes()
+    bulb_info = client.bulbs.info(device_mac=mac)
+    info = bulb_info.get_non_null_attributes()
+    info['is_on'] = bulb_info.is_on
+    info['is_online'] = bulb_info.is_online
     del info['switch_state']
     _bulb_info_json_cache[mac] = info
     return info
