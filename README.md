@@ -11,6 +11,9 @@ pip install -U flask-cors
 **Get a JSON object of all bulbs and their attributes:**
 
 - **<span style="color: green">GET /bulbs</span>**
+* **Parameters:**
+  * **<u>data</u> (lower string)**: Determines what data to receive
+      * **Examples**: <i>"bulbs", "processes"</i>
 * **Example:**
   * ```
 

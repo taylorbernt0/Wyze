@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS, cross_origin
+from flask import jsonify
 import api_functions
 import uuid
 import ast
@@ -26,11 +27,19 @@ class Bulbs(Resource):
         self.client = api_functions.get_client()
 
     def get(self):
-        return app.response_class(
-            response=api_functions.get_bulbs_info_json(self.client),
-            status=200,
-            mimetype='application/json'
-        )
+        parser = reqparse.RequestParser()
+        parser.add_argument('data', required=False)
+        args = parser.parse_args()
+        data = args['data']
+
+        if data == 'bulbs':
+            return app.response_class(
+                response=api_functions.get_bulbs_info_json(self.client),
+                status=200,
+                mimetype='application/json'
+            )
+        elif data == 'processes':
+            return jsonify(list(currentProcesses.keys()))
 
     def post(self):
         parser = reqparse.RequestParser()
