@@ -2,6 +2,8 @@ export FLASK_APP=server.py
 export FLASK_ENV=development
 flask run -h 192.168.1.199
 
+pip install -U flask-cors
+
 ##Requests:
 
 ---

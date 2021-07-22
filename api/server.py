@@ -46,6 +46,8 @@ class Bulbs(Resource):
         mode = args['mode']
         brightness = args['brightness']
         color = args['color']
+        print(mode)
+        print(macs)
 
         try:
             # Validate mode arguments
