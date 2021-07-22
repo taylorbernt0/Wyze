@@ -11,10 +11,12 @@ export default {
         },
     },
     actions: {
-        async bulbPost(_, { mode, macs }) {
+        async bulbPost(_, { mode, macs, color }) {
+            console.log(color);
             let payload = {
                 mode: mode,
                 macs: JSON.stringify(macs),
+                color: color
             };
             const response = await axios.post("/bulbs", payload);
             return response;

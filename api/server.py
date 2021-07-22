@@ -57,6 +57,7 @@ class Bulbs(Resource):
         color = args['color']
         print(mode)
         print(macs)
+        print(color)
 
         try:
             # Validate mode arguments

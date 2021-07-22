@@ -1,22 +1,47 @@
 <template>
     <div class="home">
-        <Button
-            label="Rainbow"
-            @click="bulbPost({ mode: 'rainbow', macs: selectedBulbs })"
-        />
-        <Button
-            label="Strobe"
-            @click="bulbPost({ mode: 'strobe', macs: selectedBulbs })"
-        />
-        <Button
-            label="Party"
-            @click="bulbPost({ mode: 'party', macs: selectedBulbs })"
-        />
-        <Button label="Check All" @click="checkAll()" />
-        <Button
-            label="Delete Processes"
-            @click="deleteProcess"
-        />
+        <div>
+            <Button
+                label="Rainbow"
+                @click="bulbPost({ mode: 'rainbow', macs: selectedBulbs })"
+            />
+            <Button
+                label="Strobe"
+                @click="bulbPost({ mode: 'strobe', macs: selectedBulbs })"
+            />
+            <Button
+                label="Party"
+                @click="bulbPost({ mode: 'party', macs: selectedBulbs })"
+            />
+            <Button label="Check All" @click="checkAll()" />
+            <Button label="Delete Processes" @click="deleteProcess" />
+        </div>
+        <div>
+            #<input v-model="color" />
+            <Button
+                label="Change Color"
+                @click="
+                    bulbPost({
+                        mode: 'color',
+                        macs: selectedBulbs,
+                        color: color,
+                    })
+                "
+            />
+        </div>
+        <div>
+            <input v-model="temp" />
+            <Button
+                label="Change Temp"
+                @click="
+                    bulbPost({
+                        mode: 'temp',
+                        macs: selectedBulbs,
+                        color: temp,
+                    })
+                "
+            />
+        </div>
         <div v-for="bulb in bulbsList" :key="bulb.mac">
             <Bulb
                 :name="bulb.nickname"
@@ -39,6 +64,8 @@ export default {
     data() {
         return {
             selectedBulbs: [],
+            color: null,
+            temp: null,
         };
     },
     components: {
