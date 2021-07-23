@@ -25,11 +25,11 @@ export default {
     color: white;
     border-radius: 7px;
     border: none;
-    background-color: #00a2ff;
+    background-color: #00dfe4;
 
     &:hover {
         cursor: pointer;
-        background-color: #35b0f7;
+        background-color: #3be6e9;
     }
 
     &:active {

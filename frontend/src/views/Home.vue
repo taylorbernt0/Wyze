@@ -1,21 +1,6 @@
 <template>
     <div class="home">
-        <div>
-            <Button
-                label="Rainbow"
-                @click="bulbPost({ mode: 'rainbow', macs: selectedBulbs })"
-            />
-            <Button
-                label="Strobe"
-                @click="bulbPost({ mode: 'strobe', macs: selectedBulbs })"
-            />
-            <Button
-                label="Party"
-                @click="bulbPost({ mode: 'party', macs: selectedBulbs })"
-            />
-            <Button label="Check All" @click="checkAll()" />
-            <Button label="Delete Processes" @click="deleteProcess" />
-        </div>
+        <div><Button label="Check All" @click="checkAll()" /></div>
         <div>
             #<input v-model="color" />
             <Button
@@ -62,10 +47,9 @@ import { mapActions, mapGetters } from "vuex";
 
 export default {
     name: "Home",
-    computed: mapGetters("bulbs", ["bulbsList"]),
+    computed: mapGetters("bulbs", ["bulbsList", "selectedBulbs"]),
     data() {
         return {
-            selectedBulbs: [],
             color: null,
             temp: null,
         };
@@ -78,13 +62,19 @@ export default {
         this.getBulbs();
     },
     methods: {
-        ...mapActions("bulbs", ["getBulbs", "bulbPost", "deleteProcess"]),
+        ...mapActions("bulbs", [
+            "getBulbs",
+            "bulbPost",
+            "deleteProcess",
+            "updateSelectedBulbs",
+        ]),
         checked(mac) {
             if (this.selectedBulbs.includes(mac)) {
-                this.selectedBulbs = this.selectedBulbs.filter(
-                    (a) => a !== mac
+                this.updateSelectedBulbs(
+                    this.selectedBulbs.filter((a) => a !== mac)
                 );
             } else this.selectedBulbs.push(mac);
+            this.updateSelectedBulbs(this.selectedBulbs);
         },
         checkAll() {
             this.bulbsList.forEach((bulb) => {

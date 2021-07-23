@@ -8412,6 +8412,16 @@ pretty@2.0.0, pretty@^2.0.0:
     extend-shallow "^2.0.1"
     js-beautify "^1.6.12"
 
+primeicons@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/primeicons/-/primeicons-4.1.0.tgz#19eaef8ef5594b0006358ae64e738d03e167c9bb"
+  integrity sha512-uEv2pSPk1zQCfaB2VgnUfnUxxlGryYi+5rbdxmZBBt5v9S/pscIQYS5YDLxsQZ7D9jn5c76+Tx5wX/2J1nK6sA==
+
+primevue@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/primevue/-/primevue-2.4.2.tgz#7c4920e388a119a574db4030d9ca160dcd747f47"
+  integrity sha512-AuAmwl7+MKLau/FoRNOPMOT+l9Ky01SOlKY02nYBBlw6KXksQ1ao4r/iT04xjA+9nyQLH+KYC5eL9NZr3O5/NA==
+
 process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
