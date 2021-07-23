@@ -4,10 +4,14 @@ export default {
     namespaced: true,
     state: {
         bulbs: [],
+        selectedBulbs: [],
     },
     getters: {
         bulbsList(state) {
             return state.bulbs;
+        },
+        selectedBulbs(state) {
+            return state.selectedBulbs;
         },
     },
     actions: {
@@ -16,7 +20,7 @@ export default {
             let payload = {
                 mode: mode,
                 macs: JSON.stringify(macs),
-                color: color
+                color: color,
             };
             const response = await axios.post("/bulbs", payload);
             return response;
@@ -36,6 +40,10 @@ export default {
             );
         },
 
+        async updateSelectedBulbs({ commit }, selectedBulbs) {
+            commit("setSelectedBulbs", selectedBulbs);
+        },
+
         async deleteProcess() {
             const response = await axios.delete("/bulbs");
             return response.data;
@@ -45,6 +53,9 @@ export default {
     mutations: {
         setBulbs(state, bulbs) {
             state.bulbs = bulbs;
+        },
+        setSelectedBulbs(state, selectedBulbs) {
+            state.selectedBulbs = selectedBulbs;
         },
     },
 };
