@@ -89,7 +89,7 @@ class Bulbs(Resource):
                 kwargs_list['color'] = color
 
             # Create mode process
-            id = str(uuid.uuid4())
+            id = f'{uuid.uuid4()}/{mode}/{macs}'
             p = Process(target=mode_map[mode], args=(self.client, macs,), kwargs=kwargs_list, daemon=True, name=id)
             currentProcesses[id] = p
             p.start()
