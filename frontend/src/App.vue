@@ -33,5 +33,12 @@ body {
     .body {
         margin: 4.5em 0.5em;
     }
+
+    *, *::after, *::before {
+      -webkit-user-select: none;
+      -webkit-user-drag: none;
+      -webkit-app-region: no-drag;
+      cursor: default;
+    }
 }
 </style>

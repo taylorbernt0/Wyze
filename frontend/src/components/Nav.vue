@@ -58,6 +58,7 @@ nav {
         align-items: center;
 
         .title {
+            margin-left: 1em;
             width: 8em;
             color: #ffffff;
             text-align: center;

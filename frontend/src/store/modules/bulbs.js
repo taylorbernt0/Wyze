@@ -3,12 +3,12 @@ import axios from "axios";
 export default {
     namespaced: true,
     state: {
-        bulbs: [],
+        bulbGroups: [],
         selectedBulbs: [],
     },
     getters: {
-        bulbsList(state) {
-            return state.bulbs;
+        bulbGroups(state) {
+            return state.bulbGroups;
         },
         selectedBulbs(state) {
             return state.selectedBulbs;
@@ -35,10 +35,25 @@ export default {
             let bulbs = Object.keys(response.data).map(
                 (key) => response.data[key]
             );
-            commit(
-                "setBulbs",
-                bulbs.sort((a, b) => a.nickname.localeCompare(b.nickname))
-            );
+            bulbs = bulbs.sort((a, b) => a.nickname.localeCompare(b.nickname));
+            let bulbGroups = [];
+            let lastBulbGroup = '';
+            bulbs.forEach(bulb => {
+               let bulbGroupSplit = bulb['nickname'].split(' ');
+               if(!isNaN(bulbGroupSplit[bulbGroupSplit.length - 1]))
+                   bulbGroupSplit.pop();
+               let bulbGroup = bulbGroupSplit.join(' ');
+               if(bulbGroup !== lastBulbGroup){
+                   lastBulbGroup = bulbGroup;
+                   let newGroupObj = {};
+                   newGroupObj[bulbGroup] = [bulb];
+                   bulbGroups.push(newGroupObj);
+               }else{
+                   bulbGroups[bulbGroups.length - 1][bulbGroup].push(bulb);
+               }
+            });
+            console.log(bulbGroups);
+            commit("setBulbs", bulbGroups);
         },
 
         async updateSelectedBulbs({ commit }, selectedBulbs) {
@@ -52,8 +67,8 @@ export default {
     },
 
     mutations: {
-        setBulbs(state, bulbs) {
-            state.bulbs = bulbs;
+        setBulbs(state, bulbGroups) {
+            state.bulbGroups = bulbGroups;
         },
         setSelectedBulbs(state, selectedBulbs) {
             state.selectedBulbs = selectedBulbs;

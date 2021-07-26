@@ -34,10 +34,10 @@
 
         <grid-layout :layout.sync="layout"
                  :col-num="5"
-                 :row-height="layout.length / 5"
-                 :is-draggable="true"
+                 :row-height="1"
+                 :is-draggable="false"
                  :is-resizable="false"
-                 :vertical-compact="true"
+                 :vertical-compact="false"
                  :use-css-transforms="true">
             <grid-item v-for="data in layout"
                        :static="false"
@@ -46,8 +46,8 @@
                        :w="data.w"
                        :h="data.h"
                        :i="data.i"
-                       :key="data.bulb.mac">
-                <Bulb
+                       :key="data.i">
+                <Bulb v-if="data.bulb"
                 :name="data.bulb.nickname"
                 :mac="data.bulb.mac"
                 :isChecked="selectedBulbs.includes(data.bulb.mac)"
@@ -57,7 +57,7 @@
                 :color="'#' + data.bulb.color"
                 :temperature="data.bulb.color_temp"
                 @checked="checked(data.bulb.mac)"
-            />
+                />
             </grid-item>
         </grid-layout>
     </div>
@@ -68,10 +68,11 @@ import Button from "@/components/Button.vue";
 import Bulb from "@/components/Bulb.vue";
 import VueGridLayout from 'vue-grid-layout';
 import { mapActions, mapGetters } from "vuex";
+import 'primevue/resources/themes/saga-blue/theme.css';
 
 export default {
     name: "Home",
-    computed: mapGetters("bulbs", ["bulbsList", "selectedBulbs"]),
+    computed: mapGetters("bulbs", ["bulbGroups", "selectedBulbs"]),
     data() {
         return {
             color: null,
@@ -104,15 +105,31 @@ export default {
             this.updateSelectedBulbs(this.selectedBulbs);
         },
         checkAll() {
-            this.bulbsList.forEach((bulb) => {
-                this.checked(bulb.mac);
+            this.bulbGroups.forEach((bulbGroup) => {
+                const groupName = Object.keys(bulbGroup)[0];
+                bulbGroup[groupName].forEach(bulb => {
+                  this.checked(bulb.mac);
+                });
             });
         },
         createGridLayout() {
             let i=0;
-            this.bulbsList.forEach(bulb => {
-              this.layout.push({"x": i%5, "y": Math.round(i/5), "w": 1, "h": 15, "i": i, "bulb": bulb});
-              i++;
+            let r=0;
+            let max_cols = 5;
+            this.bulbGroups.forEach(bulbGroup => {
+              const groupName = Object.keys(bulbGroup)[0];
+              let c=0;
+              bulbGroup[groupName].forEach(bulb => {
+                this.layout.push({"x": c, "y": r, "w": 1, "h": 15, "i": i, "bulb": bulb});
+                i++;
+                c++;
+              });
+              while(c < max_cols){ // Empty cells to maintain horizontal grid integrity
+               this.layout.push({"x": c, "y": r, "w": 1, "h": 15, "i": i, "bulb": null});
+               i++;
+               c++;
+              }
+              r++;
             });
         },
     },

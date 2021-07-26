@@ -6,13 +6,13 @@
 
         <br>
 
-        <i v-bind:class="{pi:true, 'pi-sun':true}" v-bind:style="{fontSize: '5rem', color: isOnline ? (isOn ? color : 'black') : 'grey'}"></i>
+        <i v-bind:class="{pi:true, 'pi-sun':true}" v-bind:style="{fontSize: '3vw', color: isOnline ? (isOn ? color : 'black') : 'grey'}"></i>
 
         <br>
         <br>
 
         <div v-if="isOnline" class="brightness-bar">
-          <div class="brightness-bar-inside"></div>
+          <div class="brightness-bar-inside" v-bind:style="{width: brightness+'%'}"></div>
         </div>
     </div>
 </template>
@@ -45,8 +45,8 @@ export default {
   background: #dfe1e3;
   padding: 15px;
   margin: 10px;
-  width: 90%;
-  height: 9rem;
+  width: 100%;
+  height: 100%;
   border-radius: 5%;
 }
 .isOffline{
@@ -65,7 +65,6 @@ export default {
 }
 .brightness-bar-inside {
   height: 5px;
-  width: 80%;
   background-color: #465a66;
 }
 </style>
