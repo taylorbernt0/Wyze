@@ -1,12 +1,12 @@
 <template>
     <div class="bulb" v-bind:class="{isChecked: isChecked, isOffline: !isOnline}" @click="isOnline ? checked() : ''">
         <div>
-          <strong>{{ name }}</strong>
+          <strong v-bind:class="{textOffline: !isOnline}">{{ name }}</strong>
         </div>
 
         <br>
 
-        <i v-bind:class="{pi:true, 'pi-sun':isOnline}" v-bind:style="{fontSize: '5rem', color: isOnline ? (isOn ? color : 'black') : 'grey'}"></i>
+        <i v-bind:class="{pi:true, 'pi-sun':true}" v-bind:style="{fontSize: '5rem', color: isOnline ? (isOn ? color : 'black') : 'grey'}"></i>
 
         <br>
         <br>
@@ -51,6 +51,9 @@ export default {
 }
 .isOffline{
   background: #646566;
+}
+.textOffline{
+  color: darkgrey;
 }
 .isChecked {
   background: #B0BEC5;
