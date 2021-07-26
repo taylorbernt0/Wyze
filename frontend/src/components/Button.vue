@@ -22,19 +22,38 @@ export default {
 .btn {
     padding: 10px 15px;
     margin: 10px;
-    color: white;
     border-radius: 7px;
-    border: none;
-    background-color: #00dfe4;
 
-    &:hover {
-        cursor: pointer;
-        background-color: #3be6e9;
+    &.primary {
+        background-color: #00dfe4;
+        color: #ffffff;
+        border: none;
+
+        &:hover {
+            cursor: pointer;
+            background-color: #3be6e9;
+        }
+
+        &:active {
+            transform: scale(0.98);
+            box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.12);
+        }
     }
 
-    &:active {
-        transform: scale(0.98);
-        box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.12);
+    &.primary-alt {
+        background: inherit;
+        color: #ffffff;
+        border: 1px solid #ffffff;
+
+        &:hover {
+            cursor: pointer;
+            filter: brightness(0.4);
+        }
+
+        &:active {
+            transform: scale(0.98);
+            box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.12);
+        }
     }
 }
 </style>

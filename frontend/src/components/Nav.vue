@@ -4,17 +4,24 @@
         <div class="button-group">
             <Button
                 label="Rainbow"
+                class="primary-alt"
                 @click="bulbPost({ mode: 'rainbow', macs: selectedBulbs })"
             />
             <Button
                 label="Strobe"
+                class="primary-alt"
                 @click="bulbPost({ mode: 'strobe', macs: selectedBulbs })"
             />
             <Button
                 label="Party"
+                class="primary-alt"
                 @click="bulbPost({ mode: 'party', macs: selectedBulbs })"
             />
-            <Button label="Delete Processes" @click="deleteProcess" />
+            <Button
+                label="Delete Processes"
+                class="primary-alt"
+                @click="deleteProcess"
+            />
         </div>
     </nav>
 </template>

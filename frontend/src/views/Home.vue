@@ -1,10 +1,13 @@
 <template>
     <div class="home">
-        <div><Button label="Check All" @click="checkAll()" /></div>
+        <div>
+            <Button class="primary" label="Check All" @click="checkAll()" />
+        </div>
         <div>
             #<input v-model="color" />
             <Button
                 label="Change Color"
+                class="primary"
                 @click="
                     bulbPost({
                         mode: 'color',
@@ -18,6 +21,7 @@
             <input v-model="temp" />
             <Button
                 label="Change Temp"
+                class="primary"
                 @click="
                     bulbPost({
                         mode: 'temp',
