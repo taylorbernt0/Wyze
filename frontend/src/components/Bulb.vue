@@ -10,6 +10,15 @@
         <div>
             online: {{ isOnline }}
         </div>
+        <div>
+            color: {{color}}
+        </div>
+        <div>
+            temperature: {{temperature}}
+        </div>
+        <div>
+            brightness: {{brightness}}
+        </div>
     </div>
 </template>
 
@@ -21,7 +30,9 @@ export default {
         mac: String,
         isChecked: Boolean,
         isOnline: Boolean,
-        color: String
+        brightness: Number,
+        color: String,
+        temperature: Number
     },
     methods: {
         checked() {

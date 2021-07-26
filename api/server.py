@@ -55,9 +55,6 @@ class Bulbs(Resource):
         mode = args['mode']
         brightness = args['brightness']
         color = args['color']
-        print(mode)
-        print(macs)
-        print(color)
 
         try:
             # Validate mode arguments
@@ -86,7 +83,16 @@ class Bulbs(Resource):
 
             # COLOR
             if color is not None:
-                kwargs_list['color'] = color
+                if mode == 'temp':
+                    if not color.isdigit():
+                        return {'data': 'Temp Must Be A String In Range [1800, 6500]'}, 404
+                    temp = int(color)
+                    if 1799 < temp < 6501:
+                        kwargs_list['temp'] = color
+                    else:
+                        return {'data': 'Temp Must Be In Range [1800, 6500]'}, 404
+                else:
+                    kwargs_list['color'] = color
 
             # Create mode process
             id = f'{uuid.uuid4()}/{mode}/{macs}'
