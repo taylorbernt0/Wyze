@@ -31,7 +31,7 @@ body {
     color: #2c3e50;
 
     .body {
-        margins: 0.5em;
+        margin: 4.5em 0.5em;
     }
 }
 </style>
