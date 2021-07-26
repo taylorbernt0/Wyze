@@ -1,7 +1,7 @@
 <template>
     <nav>
-        <span class="title">WYZE</span>
-        <span>
+        <div class="title"><img src="../assets/WyzeLogo.svg" alt="" /></div>
+        <div class="button-group">
             <Button
                 label="Rainbow"
                 @click="bulbPost({ mode: 'rainbow', macs: selectedBulbs })"
@@ -15,7 +15,7 @@
                 @click="bulbPost({ mode: 'party', macs: selectedBulbs })"
             />
             <Button label="Delete Processes" @click="deleteProcess" />
-        </span>
+        </div>
     </nav>
 </template>
 
@@ -37,10 +37,18 @@ export default {
 
 <style scoped lang="scss">
 nav {
-    background-color: #949494;
+    padding: 0.25em 0.5em;
+    display: flex;
+    align-items: center;
+    background-color: #212529;
     .title {
-        font-size: 24px;
-        color: #00dfe4;
+        width: 8em;
+        color: #ffffff;
+        text-align: center;
+    }
+
+    .button-group {
+        margin-left: auto;
     }
 }
 </style>
