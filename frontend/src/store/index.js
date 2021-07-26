@@ -13,8 +13,8 @@ export default new Vuex.Store({
         bulbs,
     },
 });
-
-axios.defaults.baseURL = 'http://192.168.1.133:5000';
+//'http://192.168.1.133:5000';
+axios.defaults.baseURL = 'http://localhost:5000';
 axios.interceptors.response.use(
     (response) => {
         return response;

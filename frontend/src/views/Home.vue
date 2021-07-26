@@ -33,7 +33,9 @@
                 :mac="bulb.mac"
                 :isChecked="selectedBulbs.includes(bulb.mac)"
                 :isOnline="bulb.is_online"
+                :brightness="bulb.brightness"
                 :color="'#' + bulb.color"
+                :temperature="bulb.color_temp"
                 @checked="checked(bulb.mac)"
             />
         </div>
