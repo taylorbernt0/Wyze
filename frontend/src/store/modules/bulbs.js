@@ -23,6 +23,7 @@ export default {
                 color: color,
             };
             const response = await axios.post("/bulbs", payload);
+            console.log(response)
             return response;
         },
 

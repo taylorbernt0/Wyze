@@ -27,24 +27,42 @@
                 "
             />
         </div>
-        <div v-for="bulb in bulbsList" :key="bulb.mac">
-            <Bulb
-                :name="bulb.nickname"
-                :mac="bulb.mac"
-                :isChecked="selectedBulbs.includes(bulb.mac)"
-                :isOnline="bulb.is_online"
-                :brightness="bulb.brightness"
-                :color="'#' + bulb.color"
-                :temperature="bulb.color_temp"
-                @checked="checked(bulb.mac)"
+
+        <grid-layout :layout.sync="layout"
+                 :col-num="5"
+                 :row-height="layout.length / 5"
+                 :is-draggable="true"
+                 :is-resizable="false"
+                 :vertical-compact="true"
+                 :use-css-transforms="true">
+            <grid-item v-for="data in layout"
+                       :static="false"
+                       :x="data.x"
+                       :y="data.y"
+                       :w="data.w"
+                       :h="data.h"
+                       :i="data.i"
+                       :key="data.bulb.mac">
+                <Bulb
+                :name="data.bulb.nickname"
+                :mac="data.bulb.mac"
+                :isChecked="selectedBulbs.includes(data.bulb.mac)"
+                :isOn="data.bulb.is_on"
+                :isOnline="data.bulb.is_online"
+                :brightness="data.bulb.brightness"
+                :color="'#' + data.bulb.color"
+                :temperature="data.bulb.color_temp"
+                @checked="checked(data.bulb.mac)"
             />
-        </div>
+            </grid-item>
+        </grid-layout>
     </div>
 </template>
 
 <script>
 import Button from "@/components/Button.vue";
 import Bulb from "@/components/Bulb.vue";
+import VueGridLayout from 'vue-grid-layout';
 import { mapActions, mapGetters } from "vuex";
 
 export default {
@@ -54,14 +72,17 @@ export default {
         return {
             color: null,
             temp: null,
+            layout: [],
         };
     },
     components: {
         Button,
         Bulb,
+        GridLayout: VueGridLayout.GridLayout,
+        GridItem: VueGridLayout.GridItem
     },
     created() {
-        this.getBulbs();
+        this.getBulbs().then(()=> this.createGridLayout());
     },
     methods: {
         ...mapActions("bulbs", [
@@ -81,6 +102,13 @@ export default {
         checkAll() {
             this.bulbsList.forEach((bulb) => {
                 this.checked(bulb.mac);
+            });
+        },
+        createGridLayout() {
+            let i=0;
+            this.bulbsList.forEach(bulb => {
+              this.layout.push({"x": i%5, "y": Math.round(i/5), "w": 1, "h": 15, "i": i, "bulb": bulb});
+              i++;
             });
         },
     },
