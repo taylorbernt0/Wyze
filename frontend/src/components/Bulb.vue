@@ -12,7 +12,7 @@
         <br>
 
         <div v-if="isOnline" class="brightness-bar">
-          <div class="brightness-bar-inside" v-bind:style="{width: brightness+'%'}"></div>
+          <div class="brightness-bar-inside" v-bind:style="{width: isOn ? brightness+'%' : 0}"></div>
         </div>
     </div>
 </template>
