@@ -16,15 +16,12 @@ export default {
     },
     actions: {
         async bulbPost(_, { mode, macs, color }) {
-            console.log(color);
             let payload = {
                 mode: mode,
                 macs: JSON.stringify(macs),
                 color: color,
             };
-            const response = await axios.post("/bulbs", payload);
-            console.log(response)
-            return response;
+            return await axios.post("/bulbs", payload);
         },
 
         async getBulbs({ commit }) {
@@ -52,7 +49,6 @@ export default {
                    bulbGroups[bulbGroups.length - 1][bulbGroup].push(bulb);
                }
             });
-            console.log(bulbGroups);
             commit("setBulbs", bulbGroups);
         },
 
