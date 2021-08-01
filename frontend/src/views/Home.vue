@@ -75,6 +75,7 @@ export default {
     computed: mapGetters("bulbs", ["bulbGroups", "selectedBulbs"]),
     data() {
         return {
+            refreshDelay: 10000,
             color: null,
             temp: null,
             layout: [],
@@ -87,7 +88,8 @@ export default {
         GridItem: VueGridLayout.GridItem
     },
     created() {
-        this.getBulbs().then(()=> this.createGridLayout());
+        this.refreshBulbs();
+        this.timer = setInterval(this.refreshBulbs, this.refreshDelay);
     },
     methods: {
         ...mapActions("bulbs", [
@@ -96,6 +98,9 @@ export default {
             "deleteProcess",
             "updateSelectedBulbs",
         ]),
+        refreshBulbs(){
+          this.getBulbs().then(() => this.createGridLayout());
+        },
         checked(mac) {
             if (this.selectedBulbs.includes(mac)) {
                 this.updateSelectedBulbs(
@@ -116,6 +121,7 @@ export default {
             let i=0;
             let r=0;
             let max_cols = 5;
+            this.layout = [];
             this.bulbGroups.forEach(bulbGroup => {
               const groupName = Object.keys(bulbGroup)[0];
               let c=0;
@@ -133,5 +139,8 @@ export default {
             });
         },
     },
+    beforeDestroy() {
+      clearInterval(this.timer);
+    }
 };
 </script>
