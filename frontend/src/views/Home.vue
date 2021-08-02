@@ -89,7 +89,6 @@ export default {
     },
     created() {
         this.refreshBulbs();
-        this.timer = setInterval(this.refreshBulbs, this.refreshDelay);
     },
     methods: {
         ...mapActions("bulbs", [
@@ -99,7 +98,7 @@ export default {
             "updateSelectedBulbs",
         ]),
         refreshBulbs(){
-          this.getBulbs().then(() => this.createGridLayout());
+          return this.getBulbs().then(() => this.createGridLayout()).then(() => this.refreshBulbs());
         },
         checked(mac) {
             if (this.selectedBulbs.includes(mac)) {
